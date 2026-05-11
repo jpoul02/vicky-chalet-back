@@ -1,0 +1,14 @@
+from pydantic import BaseModel
+
+
+class LoginInput(BaseModel):
+    email: str
+    password: str
+
+
+class UsuarioOut(BaseModel):
+    id: str
+    email: str
+    negocio_nombre: str
+
+    model_config = {"from_attributes": True}
