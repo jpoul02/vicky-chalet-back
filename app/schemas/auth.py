@@ -16,3 +16,10 @@ class UsuarioOut(BaseModel):
     negocio_nombre: str
 
     model_config = {"from_attributes": True}
+
+
+class LoginOut(BaseModel):
+    id: str
+    email: str
+    negocio_nombre: str
+    access_token: str

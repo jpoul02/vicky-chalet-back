@@ -18,11 +18,15 @@ def get_db() -> Generator:
 
 def get_current_user(
     access_token: str = Cookie(default=None),
+    authorization: str = Header(default=None),
     db: Session = Depends(get_db),
 ) -> Usuario:
-    if not access_token:
+    token = access_token
+    if not token and authorization and authorization.startswith("Bearer "):
+        token = authorization[7:]
+    if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No autenticado")
-    user_id = decode_access_token(access_token)
+    user_id = decode_access_token(token)
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
     user = db.query(Usuario).filter(Usuario.id == user_id).first()
