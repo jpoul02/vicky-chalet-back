@@ -2,4 +2,7 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-# TODO: POST /whatsapp — Twilio/Meta webhook handler + NLP parser
+
+@router.get("/health")
+def bot_health():
+    return {"bot": "connected"}
