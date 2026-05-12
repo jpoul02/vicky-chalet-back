@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, get_current_user
 from app.core.security import verify_password, create_access_token
+from app.core.config import settings
 from app.models.usuario import Usuario
-from app.schemas.auth import LoginInput, UsuarioOut
+from app.schemas.auth import LoginInput, PinLoginInput, UsuarioOut
 
 router = APIRouter()
 
@@ -19,7 +20,27 @@ def login(body: LoginInput, response: Response, db: Session = Depends(get_db)):
         key="access_token",
         value=token,
         httponly=True,
-        samesite="lax",
+        samesite="none" if settings.COOKIE_SECURE else "lax",
+        secure=settings.COOKIE_SECURE,
+        max_age=60 * 60 * 24 * 7,
+    )
+    return user
+
+
+@router.post("/login-pin", response_model=UsuarioOut)
+def login_pin(body: PinLoginInput, response: Response, db: Session = Depends(get_db)):
+    if not settings.AUTH_PIN or body.pin != settings.AUTH_PIN:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="PIN incorrecto")
+    user = db.query(Usuario).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No hay usuario configurado")
+    token = create_access_token(subject=user.id)
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        samesite="none" if settings.COOKIE_SECURE else "lax",
+        secure=settings.COOKIE_SECURE,
         max_age=60 * 60 * 24 * 7,
     )
     return user

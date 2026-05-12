@@ -6,6 +6,10 @@ class LoginInput(BaseModel):
     password: str
 
 
+class PinLoginInput(BaseModel):
+    pin: str
+
+
 class UsuarioOut(BaseModel):
     id: str
     email: str
